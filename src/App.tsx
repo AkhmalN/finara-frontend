@@ -17,7 +17,7 @@ const LoadingFallback = () => (
 // Protected Route Component
 function ProtectedRoute() {
   const { isAuthenticated } = useAuth();
-  console.log("ProtectedRoute - isAuthenticated:", isAuthenticated);
+
   return isAuthenticated ? (
     <FeatureProvider>
       <AppLayout>
