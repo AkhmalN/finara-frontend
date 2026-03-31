@@ -19,17 +19,26 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type ILoginShcema } from "../schemas/login.schema";
+
 const LoginPage = () => {
-  const { login, isLoading } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await login(email, password);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<ILoginShcema>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmitLogin = async (data: ILoginShcema) => {
+    await login(data.email, data.password);
     navigate("/dashboard");
   };
 
@@ -44,7 +53,7 @@ const LoginPage = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmitLogin)} className="space-y-6">
           {/* Email Field */}
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium">
@@ -56,13 +65,14 @@ const LoginPage = () => {
                 id="email"
                 type="email"
                 placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...register("email")}
                 className="pl-10"
-                disabled={isLoading}
                 required
               />
             </div>
+            {errors.email && (
+              <p style={{ color: "red" }}>{errors.email.message}</p>
+            )}
           </div>
 
           {/* Password Field */}
@@ -76,17 +86,15 @@ const LoginPage = () => {
                 id="password"
                 type={showPassword ? "text" : "password"}
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                {...register("password")}
                 className="pl-10 pr-10"
-                disabled={isLoading}
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors disabled:opacity-50"
-                disabled={isLoading}
+                disabled={isSubmitting}
               >
                 {showPassword ? (
                   <EyeOff className="h-4 w-4" />
@@ -95,6 +103,9 @@ const LoginPage = () => {
                 )}
               </button>
             </div>
+            {errors.password && (
+              <p style={{ color: "red" }}>{errors.password.message}</p>
+            )}
           </div>
 
           {/* Remember Me & Forgot Password */}
@@ -104,7 +115,7 @@ const LoginPage = () => {
                 id="remember"
                 checked={rememberMe}
                 onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                disabled={isLoading}
+                disabled={isSubmitting}
               />
               <Label
                 htmlFor="remember"
@@ -134,10 +145,10 @@ const LoginPage = () => {
           {/* Submit Button */}
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isSubmitting}
             className="w-full h-10 text-base font-semibold"
           >
-            {isLoading ? "Signing in..." : "Sign In"}
+            {isSubmitting ? "Signing in..." : "Sign In"}
           </Button>
 
           {/* Sign Up Link */}

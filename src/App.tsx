@@ -1,50 +1,14 @@
-import { useAuth } from "@/context/auth-context";
-import { Routes, Route, Navigate, Outlet } from "react-router-dom";
-import { lazy, Suspense } from "react";
-import AuthLayout from "@/components/layouts/auth-layout";
-import AppLayout from "@/components/layouts/app-layout";
-import { FeatureProvider } from "@/context/feature-context";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { lazy } from "react";
+import AuthRoute from "./routes/auth-route";
+import ProtectedRoute from "./routes/protected-route";
 
 // Lazy load pages
 const LoginPage = lazy(() => import("@/features/auth/pages/login-page"));
 const UserPage = lazy(() => import("@/features/globals/pages/user-page"));
-
-// Loading Fallback
-const LoadingFallback = () => (
-  <div className="flex items-center justify-center h-screen">Loading...</div>
+const LicensesPage = lazy(
+  () => import("@/features/licenses/pages/register-license-page"),
 );
-
-// Protected Route Component
-function ProtectedRoute() {
-  const { isAuthenticated } = useAuth();
-
-  return isAuthenticated ? (
-    <FeatureProvider>
-      <AppLayout>
-        <Suspense fallback={<LoadingFallback />}>
-          <Outlet />
-        </Suspense>
-      </AppLayout>
-    </FeatureProvider>
-  ) : (
-    <Navigate to="/login" replace />
-  );
-}
-
-// Auth Route Component
-function AuthRoute() {
-  const { isAuthenticated } = useAuth();
-
-  return isAuthenticated ? (
-    <Navigate to="/dashboard" replace />
-  ) : (
-    <AuthLayout>
-      <Suspense fallback={<LoadingFallback />}>
-        <Outlet />
-      </Suspense>
-    </AuthLayout>
-  );
-}
 
 function App() {
   return (
@@ -52,6 +16,7 @@ function App() {
       {/* Auth Routes */}
       <Route element={<AuthRoute />}>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/licenses" element={<LicensesPage />} />
       </Route>
 
       {/* Protected Routes */}

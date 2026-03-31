@@ -34,5 +34,13 @@ export const useLogin = () => {
         toast.success("Login successful! Welcome back.");
       }
     },
+    onError: (error: any) => {
+      // Show error message from backend or generic message
+      const errorMessage =
+        error.response?.data?.message ||
+        "Login failed. Please check your credentials.";
+      toast.error(errorMessage);
+    },
+    retry: 0, // Disable retry untuk login mutation
   });
 };

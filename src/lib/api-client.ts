@@ -62,6 +62,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     const errorMessage = getErrorMessage(error);
+    const isAuthEndpoint = error.config?.url?.includes("/auth/");
 
     // Handle different error statuses
     if (error.response?.status === 401) {
@@ -83,8 +84,10 @@ apiClient.interceptors.response.use(
       error.response?.status === 422 ||
       error.response?.status === 400
     ) {
-      // Validation error
-      toast.error(errorMessage);
+      // Validation error - skip toast for auth endpoints (handled by mutation)
+      if (!isAuthEndpoint) {
+        toast.error(errorMessage);
+      }
     } else if (error.response?.status && error.response.status >= 500) {
       // Server error
       toast.error("Server error. Please try again later.");
